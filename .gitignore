@@ -1,0 +1,80 @@
+#Prerequisites
+*.d
+
+# Object files
+*.o
+*.ko
+*.obj
+*.elf
+*.crf
+*.iex
+*.Bak
+*.dep
+*.hex
+*.scvd
+*.axf
+*.htm
+*.html
+*.lnp
+*.sct
+JLinkLog.txt
+JLinkSettings.ini
+
+# Linker output
+*.ilk
+*.map
+*.exp
+*.lst
+
+# Precompiled Header
+*.gch
+*.pch
+
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
+
+# Shared Objects
+*.dll
+*.so
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+
+# rar zip
+*.rar
+*.7z
+*.zip
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# Kernel Module Compile Results
+*.mod*
+*.cmd
+*.tmp_versions/
+modules.order
+Module.symvers
+Mkfile.old
+dkms.conf
+
+
+
+
+
+
+
+
+
+
