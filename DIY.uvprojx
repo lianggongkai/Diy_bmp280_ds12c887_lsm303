@@ -52,7 +52,7 @@
           <CreateLib>0</CreateLib>
           <CreateHexFile>1</CreateHexFile>
           <DebugInformation>1</DebugInformation>
-          <BrowseInformation>0</BrowseInformation>
+          <BrowseInformation>1</BrowseInformation>
           <ListingPath>.\Listings\</ListingPath>
           <HexFormatSelection>1</HexFormatSelection>
           <Merge32K>0</Merge32K>
@@ -522,6 +522,11 @@
               <FileName>i2c_soft.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\USER\i2c_soft.c</FilePath>
+            </File>
+            <File>
+              <FileName>bme280.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\USER\bme280.c</FilePath>
             </File>
           </Files>
         </Group>

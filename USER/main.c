@@ -32,9 +32,15 @@
 #include "i2c_ds3231.h"
 #include "ds3231.h"
 #include "string.h"
+#include "bme280.h"
+#include "bme280_defs.h"
+#include "stdio.h"
 
 #define HardwareInitStackSize	configMINIMAL_STACK_SIZE
 #define HardwareInitPriority	(tskIDLE_PRIORITY+1)
+struct bme280_calib_data cal;
+struct bme280_uncomp_data uncomp_data;
+struct bme280_data	comp_data;
 
 void vHardwareInit(void *p)
 {
@@ -90,9 +96,17 @@ void ShowSin(float angle,u16 color)
 #define DrawLCDPriority			(tskIDLE_PRIORITY+2)
 void vDrawLCD(void *p)
 {
-	//int a = 1;
+	int a = 1;
+	u8 id = 0;
 	char Buff[20] = {0};
+	char Pressure[15] = {0};
+	char Temp[15] = {0};
+	char Huminity[15] = {0};
+	char Altitude[15] = {0};
+	char RTT[15] = {0};
+	float temp0 = 0.0f;
 	Lcd_Clear(WHITE);
+	ReadCalibrate(&cal);
 	while(1){
 		vTaskSuspendAll();
 		//ReadDS3231(0,&sec);
@@ -133,22 +147,38 @@ void vDrawLCD(void *p)
 				strcpy(Buff+18,"ÐÇÆÚÈÕ");break;
 			default:break;
 		}
+		//sprintf(ChipId,"%d",);
+		id = BMP280_RD_Byte(BME280_CHIP_ID_ADDR);
+		ReadCalibrate(&cal);
+		ReadMeasureResult(&uncomp_data);
+		comp_data.humidity = compensate_humidity(&uncomp_data,&cal);
+		comp_data.pressure = compensate_pressure(&uncomp_data,&cal);
+		temp0 = compensate_temperature_f32(&uncomp_data,&cal);
+		BME280_SetOperationMode();
+		sprintf(Pressure,"P:%5.2f(Pa)",(float)comp_data.pressure/100);
+		//Pressure[strlen(Pressure)] = '\0';
 		
+		sprintf(Temp,"T:%5.2f(C)",temp0/2);
+		//Temp[strlen(Temp)] = '\0';
+		
+		sprintf(Huminity,"H:%5.2f(RH)",(float)comp_data.humidity/1024);
+		//Huminity[strlen(Huminity)] = '\0';
+		
+		sprintf(Altitude,"HB:%5.2f(m)\n",((1013.25-((float)comp_data.pressure/100))*9.0f));
+		
+		sprintf(RTT,"RTT:%2.2f(C)\n",(calendar.temper_H+calendar.temper_L/100.0f));
 		
 		Gui_DrawFont_GBK16(3,0,BLACK,WHITE,(u8 *)(Buff+9));
 		Gui_DrawFont_GBK1632(0,16,BLACK,GREEN,(u8 *)Buff);
-		//Gui_DrawFont_Num32(0,32,RED,WHITE,9);
-		//Gui_DrawFont_Num32(26,32,RED,WHITE,8);
-		//Gui_DrawFont_Num32(32,32,RED,WHITE,2);
-		//Gui_DrawFont_Num32(48,32,RED,WHITE,3);
-		//Gui_DrawFont_Num32(0,32,RED,WHITE,0);
-		//Gui_DrawLine(0,0,0,130,BLUE);
-		//Gui_DrawLine(1,1,1,129,BLUE);
-		//Gui_DrawLine(2,2,2,128,BLUE);
-		//ShowSin((0.17f)*(a-1),WHITE);
-		//ShowSin((0.17f)*(a++),BLUE);
+		Gui_DrawFont_GBK16(0,48,BLACK,WHITE,(u8 *)Pressure);
+		Gui_DrawFont_GBK16(0,64,BLACK,WHITE,(u8 *)Temp);
+		Gui_DrawFont_GBK16(0,80,BLACK,WHITE,(u8 *)Huminity);
+		Gui_DrawFont_GBK16(0,96,BLACK,WHITE,(u8 *)Altitude);
+		Gui_DrawFont_GBK16(0,112,BLACK,WHITE,(u8 *)RTT);
+		
 		xTaskResumeAll();
-		vTaskDelay(100);
+		if(a++ > 10)GPIO_ResetBits(GPIOB,GPIO_Pin_12);
+		vTaskDelay(500);
 	}
 }
 

@@ -139,7 +139,6 @@
         <SetRegEntry>
           <Number>0</Number>
           <Key>DLGUARM</Key>
-          <Name></Name>
         </SetRegEntry>
         <SetRegEntry>
           <Number>0</Number>
@@ -183,6 +182,16 @@
           <count>2</count>
           <WinNumber>1</WinNumber>
           <ItemText>SetCalenderPara,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>3</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>cal,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>4</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>comp_data,0x0A</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>
@@ -512,6 +521,19 @@
       <bDave2>0</bDave2>
       <PathWithFileName>.\USER\i2c_soft.c</PathWithFileName>
       <FilenameWithoutPath>i2c_soft.c</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
+    <File>
+      <GroupNumber>4</GroupNumber>
+      <FileNumber>21</FileNumber>
+      <FileType>1</FileType>
+      <tvExp>0</tvExp>
+      <Focus>0</Focus>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
+      <PathWithFileName>.\USER\bme280.c</PathWithFileName>
+      <FilenameWithoutPath>bme280.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>

@@ -7,7 +7,6 @@ Calendar_OBJ calendar;
 #define DS3231_WriteAddress	0xD0	
 #define DS3231_ReadAddress	0xD1
 
-
 u8 BCD2HEX(u8 val)
 {
 	u8 i;
