@@ -528,6 +528,11 @@
               <FileType>1</FileType>
               <FilePath>.\USER\bme280.c</FilePath>
             </File>
+            <File>
+              <FileName>lsm303.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\USER\lsm303.c</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>

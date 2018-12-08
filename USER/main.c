@@ -34,6 +34,7 @@
 #include "string.h"
 #include "bme280.h"
 #include "bme280_defs.h"
+#include "lsm303.h"
 #include "stdio.h"
 
 #define HardwareInitStackSize	configMINIMAL_STACK_SIZE
@@ -104,7 +105,10 @@ void vDrawLCD(void *p)
 	char Huminity[15] = {0};
 	char Altitude[15] = {0};
 	char RTT[15] = {0};
+	char Min[30] = {0};
+	char Max[30] = {0};
 	float temp0 = 0.0f;
+	vector running_min = {2047, 2047, 2047}, running_max = {-2048, -2048, -2048};
 	Lcd_Clear(WHITE);
 	ReadCalibrate(&cal);
 	while(1){
@@ -166,18 +170,34 @@ void vDrawLCD(void *p)
 		
 		sprintf(Altitude,"HB:%5.2f(m)\n",((1013.25-((float)comp_data.pressure/100))*9.0f));
 		
-		sprintf(RTT,"RTT:%2.2f(C)\n",(calendar.temper_H+calendar.temper_L/100.0f));
+		//sprintf(RTT,"RTT:%2.2f(C)\n",(calendar.temper_H+calendar.temper_L/100.0f));
+		
+		LSM303Read();
+		
+		running_min.x = min((s16)running_min.x, (s16)mag.x);
+		running_min.y = min((s16)running_min.y, (s16)mag.y);
+		running_min.z = min((s16)running_min.z, (s16)mag.z);
+
+		running_max.x = max((s16)running_max.x, (s16)mag.x);
+		running_max.y = max((s16)running_max.y, (s16)mag.y);
+		running_max.z = max((s16)running_max.z, (s16)mag.z);
+
+		sprintf(Min,"x:%dy:%dz%d",(s16)running_min.x,(s16)running_min.y,(s16)running_min.z);
+		sprintf(Max,"x:%dy:%dz%d",(s16)running_max.x,(s16)running_max.y,(s16)running_max.z);
 		
 		Gui_DrawFont_GBK16(3,0,BLACK,WHITE,(u8 *)(Buff+9));
 		Gui_DrawFont_GBK1632(0,16,BLACK,GREEN,(u8 *)Buff);
-		Gui_DrawFont_GBK16(0,48,BLACK,WHITE,(u8 *)Pressure);
+		/*Gui_DrawFont_GBK16(0,48,BLACK,WHITE,(u8 *)Pressure);
 		Gui_DrawFont_GBK16(0,64,BLACK,WHITE,(u8 *)Temp);
 		Gui_DrawFont_GBK16(0,80,BLACK,WHITE,(u8 *)Huminity);
-		Gui_DrawFont_GBK16(0,96,BLACK,WHITE,(u8 *)Altitude);
-		Gui_DrawFont_GBK16(0,112,BLACK,WHITE,(u8 *)RTT);
+		//Gui_DrawFont_GBK16(0,96,BLACK,WHITE,(u8 *)Altitude);*/
+		//Gui_DrawFont_GBK16(0,112,BLACK,WHITE,(u8 *)RTT);
+		
+		Gui_DrawFont_GBK16(0,96,BLACK,WHITE,(u8 *)Min);
+		Gui_DrawFont_GBK16(0,112,BLACK,WHITE,(u8 *)Max);
 		
 		xTaskResumeAll();
-		if(a++ > 10)GPIO_ResetBits(GPIOB,GPIO_Pin_12);
+		//if(a++ > 10)GPIO_ResetBits(GPIOB,GPIO_Pin_12);
 		vTaskDelay(500);
 	}
 }
@@ -205,6 +225,7 @@ int main(void)
 {
 	Lcd_Init();
 	DS3231_Init();
+	LSM303Enable();
 	
 	//u8 ReadDS3231(u8 ADDR,u8 *val)
 	xTaskCreate(vHardwareInit,"hardwareInit",HardwareInitStackSize,NULL,HardwareInitPriority,NULL);
