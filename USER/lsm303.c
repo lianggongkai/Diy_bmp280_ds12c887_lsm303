@@ -31,6 +31,7 @@ u8 readAccReg(u8 reg)
 	Dat=I2C_ReceiveByte();
 	I2C_NoAck();
 	I2C_Stop();
+	return Dat;
 }
 
 void writeMagReg(u8 reg, u8 value)
@@ -181,6 +182,12 @@ void LSM303Enable(void)
   // 0x00 = 0b00000000
   // Continuous conversion mode
 	writeMagReg(LSM303_MR_REG_M,0X00);
+	m_min.x = -457;
+	m_min.y = -420;
+	m_min.z = -528;
+	m_max.x = 549;
+	m_max.y = 654;
+	m_max.z = 5296;
 	
 }
 void LSM303Read(void)

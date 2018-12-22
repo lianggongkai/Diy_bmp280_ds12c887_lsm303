@@ -102,8 +102,8 @@ void I2C_NoAck(void)
  * 函数名: u8 I2C_WaitAck(void)
  * 描述  : 等待应答信号 
  * 输入  : 无 
- * 输出  : TRUE : 有应答 
-           FALSE : 无应答 
+ * 输出  : TRUE :  有应答 
+       FALSE : 无应答 
  * 说明  :  
 ***************************************************************************/
 u8 I2C_WaitAck(void)
@@ -118,11 +118,11 @@ u8 I2C_WaitAck(void)
 		if(ucErrTime>250)
 		{
 			I2C_Stop();
-			return 0;
+			return WAIT_ACK_OV;
 		}
 	}
 	SCL_L;
-	return 1;
+	return WAIT_ACK_OK;
 }
 
 
@@ -180,5 +180,101 @@ u8 I2C_ReceiveByte(void)
 	}
 	SCL_L;
 	return ReceiveByte;
+}
+
+/*************************************************************************
+ * 函数名  : u8 MCU_I2C_Write_Byte(u8 _7bitDevAddr,u8 regAddr,u8 Bytedata)  
+ * 描述  : MCU写IIC设备 
+ * 输入  : _7bitDevAddr	, 7位设备地址不带偏移和读写标志
+ *				 : regAddr			, 寄存器地址
+ *				 : Bytedata			, 写入寄存器的数据
+ * 输出  : 成功，返回0；失败，返回1 
+ * 说明  : 用户可以根据实际的IIC设备用宏函数变成自己要的函数 
+*************************************************************************/
+u8 MCU_I2C_Write_Byte(u8 _7bitDevAddr,u8 regAddr,u8 Bytedata)
+{
+	I2C_Start();
+	I2C_SendByte(_7bitDevAddr<<1 | 0);
+	if(I2C_WaitAck() == WAIT_ACK_OV)//Wait for ack overtime
+		return MCU_I2C_WR_OV;
+	
+	I2C_SendByte(regAddr);
+	if(I2C_WaitAck() == WAIT_ACK_OV)
+		return MCU_I2C_WR_OV;
+	I2C_SendByte(Bytedata);
+	
+	if(I2C_WaitAck() == WAIT_ACK_OV)
+		return MCU_I2C_WR_OV;
+	I2C_Stop();
+	return MCU_I2C_WR_OK;
+}
+
+/*************************************************************************
+ * 函数名  : u8 MCU_I2C_Read_Byte(u8 _7bitDevAddr,u8 regAddr,u8 *val)  
+ * 描述  : MCU读取IIC设备 
+ * 输入  : _7bitDevAddr	, 7位设备地址不带偏移和读写标志
+ * 				 : regAddr				, 寄存器地址
+ *				 : val						, 读取到的数据传出地址
+ * 输出  : 成功，返回0；失败，返回1 
+ * 说明  : 用户可以根据实际的IIC设备用宏函数变成自己要的函数  
+*************************************************************************/
+u8 MCU_I2C_Read_Byte(u8 _7bitDevAddr,u8 regAddr,u8 *val)
+{
+	u8 Dat=0;
+
+	I2C_Start();
+	I2C_SendByte(_7bitDevAddr<<1 | 0);
+	if(I2C_WaitAck() == WAIT_ACK_OV)//Wait for ack overtime
+		return MCU_I2C_RD_OV;
+	
+	I2C_SendByte(regAddr);
+	if(I2C_WaitAck() == WAIT_ACK_OV)//Wait for ack overtime
+		return MCU_I2C_RD_OV;
+	
+	I2C_Start();
+	I2C_SendByte(_7bitDevAddr<<1 | 1);
+	if(I2C_WaitAck() == WAIT_ACK_OV)//Wait for ack overtime
+		return MCU_I2C_RD_OV;
+	
+	*val=I2C_ReceiveByte();
+	I2C_Stop();
+	return MCU_I2C_RD_OK;
+}
+
+/*************************************************************************
+ * 函数名  : u8 MCU_I2C_Read_Bytes(u8 _7bitDevAddr,u8 regAddr,u8 len,u8 *buff) 
+ * 描述  : MCU读取IIC设备 
+ * 输入  : _7bitDevAddr	, 7位设备地址不带偏移和读写标志
+ *				 : regAddr			, 寄存器地址
+ *				 : len					, 要读取的数据长度
+ *				 : buff					, 数据缓冲区地址
+ * 输出  : 成功，返回0；失败，返回1 
+ * 说明  : 用户可以根据实际的IIC设备用宏函数变成自己要的函数 
+*************************************************************************/
+u8 MCU_I2C_Read_Bytes(u8 _7bitDevAddr,u8 regAddr,u8 len,u8 *buff)
+{
+	u8 i = 0;
+	
+	I2C_Start();
+	I2C_SendByte(_7bitDevAddr<<1 | 0);
+	if(I2C_WaitAck() == WAIT_ACK_OV)
+		return MCU_I2C_RD_OV;
+	
+	I2C_SendByte(regAddr);
+	if(I2C_WaitAck() == WAIT_ACK_OV)
+		return MCU_I2C_RD_OV;
+	
+	I2C_Start();
+	I2C_SendByte(_7bitDevAddr<<1 | 1);
+	if(I2C_WaitAck() == WAIT_ACK_OV)
+		return MCU_I2C_RD_OV;
+	
+	while(i < len){
+		buff[i++] = I2C_ReceiveByte();
+		if(i < len)I2C_Ack();
+		else I2C_NoAck();
+	}
+	I2C_Stop();
+	return MCU_I2C_RD_OK;
 }
 
