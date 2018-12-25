@@ -3,9 +3,13 @@
 DIY a intresting toy.
 
 Function:
+
 1, Have a screen to display message
+
 2, Display calendar base on DS3231 chip
+
 3, Display a e-compass message base on LSM303DLHC chip
+
 4, Display barometric,temperature,humidity message base on BME280 chip
 
 Hardware:
