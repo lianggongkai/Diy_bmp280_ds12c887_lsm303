@@ -24,10 +24,10 @@ Hardware:
 
 5,BME280 chip
 
-6,mini bateray
-and so on
+6,mini battery and so on
 
 Software:
+
 1,FreeRTOS 
 
 2,ST Standard Library
