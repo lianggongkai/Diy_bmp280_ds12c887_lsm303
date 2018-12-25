@@ -504,6 +504,11 @@
               <FileType>1</FileType>
               <FilePath>.\USER\lsm303.c</FilePath>
             </File>
+            <File>
+              <FileName>precall.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\USER\precall.c</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>

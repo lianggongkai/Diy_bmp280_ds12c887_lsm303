@@ -26,7 +26,7 @@
 #define MCU_I2C_RD_OK	0
 #define MCU_I2C_RD_OV 1
 
-void I2C_GPIO_Config(void);
+void I2C_GPIO_Init(void);
 void I2C_Start(void);
 void I2C_Stop(void);
 void I2C_Ack(void);

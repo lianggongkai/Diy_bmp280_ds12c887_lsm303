@@ -1,7 +1,7 @@
 #include "i2c_soft.h"
 
 
-void I2C_GPIO_Config(void)
+void I2C_GPIO_Init(void)
 {
 	GPIO_InitTypeDef	GPIO_InitStructure;
 
@@ -220,8 +220,6 @@ u8 MCU_I2C_Write_Byte(u8 _7bitDevAddr,u8 regAddr,u8 Bytedata)
 *************************************************************************/
 u8 MCU_I2C_Read_Byte(u8 _7bitDevAddr,u8 regAddr,u8 *val)
 {
-	u8 Dat=0;
-
 	I2C_Start();
 	I2C_SendByte(_7bitDevAddr<<1 | 0);
 	if(I2C_WaitAck() == WAIT_ACK_OV)//Wait for ack overtime

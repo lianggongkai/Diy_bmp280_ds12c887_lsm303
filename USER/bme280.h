@@ -3,12 +3,9 @@
 #include "stm32f10x.h"
 #include "bme280_defs.h"
 
-void BMP280_WR_Byte(u8 addr,u8 bytedata);
-u8 BMP280_RD_Byte(u8 addr);
-void ReadCalibrate(struct bme280_calib_data *calibrate);
-
-void BME280_SetOperationMode(void);
-void ReadMeasureResult(struct bme280_uncomp_data *pdata);
+void SetBME280OperationMode(void);
+void ReadBME280Calibrate(struct bme280_calib_data *calibrate);
+void ReadBME280MeasureResult(struct bme280_uncomp_data *pdata);
 
 int32_t compensate_temperature(const struct bme280_uncomp_data *uncomp_data,
 						struct bme280_calib_data *calib_data);

@@ -107,14 +107,16 @@ typedef struct{
 #include "stm32f10x.h"
 /*----全局应用------*/
 void LSM303Enable(void);
-void LSM303Read(void);
-int LSM303Heading(void);
+void LSM303Read(vector *acc,vector *mag);
+int LSM303Heading(vector acc, vector mag);
+
 s16 min(s16 a,s16 b);
 s16 max(s16 a,s16 b);
+float Cal_heading(void);
 
 /*-----内部运算------*/
-int Heading(vector from);
-extern vector acc,mag,m_max,m_min;
+int Heading(vector from,vector mag,vector acc);
+extern vector m_max,m_min;
 void vector_normalize(vector *a);
 float vector_dot(const vector *a,const vector *b);
 void vector_cross(const vector *a,const vector *b, vector *out);

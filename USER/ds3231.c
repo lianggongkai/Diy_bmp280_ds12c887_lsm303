@@ -2,7 +2,7 @@
 #include "ds3231.h"
 #include "i2c_soft.h"
 
-Calendar_OBJ calendar;
+//Calendar_OBJ calendar;
 
 #define DS3231_WriteAddress	0xD0	
 #define DS3231_ReadAddress	0xD1
@@ -47,12 +47,12 @@ u8 DS3231_RD_Byte(u8 addr)
 
 	I2C_Start();
 	I2C_SendByte(DS3231_WriteAddress);
-	I2C_WaitAck();
+	if(I2C_WaitAck() == WAIT_ACK_OV)return Dat;
 	I2C_SendByte(addr);
-	I2C_WaitAck();
+	if(I2C_WaitAck() == WAIT_ACK_OV)return Dat;
 	I2C_Start();
 	I2C_SendByte(DS3231_ReadAddress);
-	I2C_WaitAck();
+	if(I2C_WaitAck() == WAIT_ACK_OV)return Dat;
 	Dat=I2C_ReceiveByte();
 	I2C_Stop();
 
@@ -69,7 +69,6 @@ void delay_ms(u16 x)
 
 void DS3231_Init(void)
 {
-	I2C_GPIO_Config();
 	DS3231_WR_Byte(0x0e,0);
 	delay_ms(2);
 	DS3231_WR_Byte(0x0f,0x0);
@@ -102,33 +101,33 @@ void Set_DS3231_Time(u8 yea,u8 mon,u8 da,u8 hou,u8 min,u8 sec,u8 week)
 }
 
 
-void Get_DS3231_Time(void)
+void Read_DS3231(Calendar_Type *calendar)
 {
-	calendar.w_year=DS3231_RD_Byte(0x06);
-	calendar.w_year=BCD2HEX(calendar.w_year);
+	calendar->w_year=DS3231_RD_Byte(0x06);
+	calendar->w_year=BCD2HEX(calendar->w_year);
 
-	calendar.w_month=DS3231_RD_Byte(0x05); 
-	calendar.w_month=BCD2HEX(calendar.w_month);
+	calendar->w_month=DS3231_RD_Byte(0x05); 
+	calendar->w_month=BCD2HEX(calendar->w_month);
 
-	calendar.w_date=DS3231_RD_Byte(0x04);
-	calendar.w_date=BCD2HEX(calendar.w_date);
+	calendar->w_date=DS3231_RD_Byte(0x04);
+	calendar->w_date=BCD2HEX(calendar->w_date);
 	 
-	calendar.hour=DS3231_RD_Byte(0x02); 
-	calendar.hour&=0x3f;
-	calendar.hour=BCD2HEX(calendar.hour);
+	calendar->hour=DS3231_RD_Byte(0x02); 
+	calendar->hour&=0x3f;
+	calendar->hour=BCD2HEX(calendar->hour);
 
-	calendar.min=DS3231_RD_Byte(0x01);
-	calendar.min=BCD2HEX(calendar.min);
+	calendar->min=DS3231_RD_Byte(0x01);
+	calendar->min=BCD2HEX(calendar->min);
 
-	calendar.sec=DS3231_RD_Byte(0x00);
-	calendar.sec=BCD2HEX(calendar.sec);
+	calendar->sec=DS3231_RD_Byte(0x00);
+	calendar->sec=BCD2HEX(calendar->sec);
 
-	calendar.week=DS3231_RD_Byte(0x03);
-	calendar.week=BCD2HEX(calendar.week);
+	calendar->week=DS3231_RD_Byte(0x03);
+	calendar->week=BCD2HEX(calendar->week);
 
 	DS3231_WR_Byte(0x0e,0x20);
-	calendar.temper_H=DS3231_RD_Byte(0x11);
-	calendar.temper_L=(DS3231_RD_Byte(0x12)>>6)*25;
+	calendar->temper_H=DS3231_RD_Byte(0x11);
+	calendar->temper_L=(DS3231_RD_Byte(0x12)>>6)*25;
 }
 
 

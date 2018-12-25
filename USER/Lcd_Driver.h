@@ -127,6 +127,9 @@ LCD_CS_SET;\
 
 #include "stm32f10x.h"
 
+#define BackLightClose() GPIO_ResetBits(GPIOB,GPIO_Pin_12)
+#define BackLightOpen()	 GPIO_SetBits(GPIOB,GPIO_Pin_12)
+
 void Lcd_WriteIndex(u8 Index);
 void Lcd_WriteData(u8 Data);
 void Lcd_WriteReg(u8 Index,u8 Data);

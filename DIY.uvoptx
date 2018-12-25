@@ -118,6 +118,7 @@
         <SetRegEntry>
           <Number>0</Number>
           <Key>DLGUARM</Key>
+          <Name>鲤E</Name>
         </SetRegEntry>
         <SetRegEntry>
           <Number>0</Number>
@@ -181,6 +182,16 @@
           <count>6</count>
           <WinNumber>1</WinNumber>
           <ItemText>ClearPage</ItemText>
+        </Ww>
+        <Ww>
+          <count>7</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>acc</ItemText>
+        </Ww>
+        <Ww>
+          <count>8</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>mag</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>
@@ -515,6 +526,18 @@
       <bDave2>0</bDave2>
       <PathWithFileName>.\USER\lsm303.c</PathWithFileName>
       <FilenameWithoutPath>lsm303.c</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
+    <File>
+      <GroupNumber>4</GroupNumber>
+      <FileNumber>23</FileNumber>
+      <FileType>1</FileType>
+      <tvExp>0</tvExp>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
+      <PathWithFileName>.\USER\precall.c</PathWithFileName>
+      <FilenameWithoutPath>precall.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>

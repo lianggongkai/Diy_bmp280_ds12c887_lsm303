@@ -84,7 +84,7 @@ extern "C" {
  * These settings should not be altered.
  *-----------------------------------------------------------
  */
-
+typedef unsigned int uint32_t;
 /* Type definitions. */
 #define portCHAR		char
 #define portFLOAT		float

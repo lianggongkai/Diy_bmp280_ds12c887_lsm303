@@ -2,7 +2,37 @@
 #include "i2c_soft.h"
 #include "math.h"
 
-vector acc,mag,m_max,m_min;
+typedef enum
+{
+	LSM303_MAGGAIN_1_3                        = 0x20,  // +/- 1.3
+	LSM303_MAGGAIN_1_9                        = 0x40,  // +/- 1.9
+	LSM303_MAGGAIN_2_5                        = 0x60,  // +/- 2.5
+	LSM303_MAGGAIN_4_0                        = 0x80,  // +/- 4.0
+	LSM303_MAGGAIN_4_7                        = 0xA0,  // +/- 4.7
+	LSM303_MAGGAIN_5_6                        = 0xC0,  // +/- 5.6
+	LSM303_MAGGAIN_8_1                        = 0xE0   // +/- 8.1
+} lsm303MagGain;
+		
+typedef enum
+{
+	LSM303_REGISTER_MAG_CRA_REG_M             = 0x00,
+	LSM303_REGISTER_MAG_CRB_REG_M             = 0x01,
+	LSM303_REGISTER_MAG_MR_REG_M              = 0x02,
+	LSM303_REGISTER_MAG_OUT_X_H_M             = 0x03,
+	LSM303_REGISTER_MAG_OUT_X_L_M             = 0x04,
+	LSM303_REGISTER_MAG_OUT_Z_H_M             = 0x05,
+	LSM303_REGISTER_MAG_OUT_Z_L_M             = 0x06,
+	LSM303_REGISTER_MAG_OUT_Y_H_M             = 0x07,
+	LSM303_REGISTER_MAG_OUT_Y_L_M             = 0x08,
+	LSM303_REGISTER_MAG_SR_REG_Mg             = 0x09,
+	LSM303_REGISTER_MAG_IRA_REG_M             = 0x0A,
+	LSM303_REGISTER_MAG_IRB_REG_M             = 0x0B,
+	LSM303_REGISTER_MAG_IRC_REG_M             = 0x0C,
+	LSM303_REGISTER_MAG_TEMP_OUT_H_M          = 0x31,
+	LSM303_REGISTER_MAG_TEMP_OUT_L_M          = 0x32
+} lsm303MagRegisters_t;
+
+vector m_max,m_min;
 
 void writeAccReg(u8 reg,u8 value)
 {
@@ -93,7 +123,7 @@ void setMagGain(magGain value)
 	writeMagReg(LSM303_CRB_REG_M,value);
 }
 
-void readAcc(void)
+void readAcc(vector *acc)
 {
 	I2C_Start();
 	I2C_SendByte(acc_address_write);
@@ -121,13 +151,14 @@ void readAcc(void)
 	I2C_NoAck();
 	I2C_Stop();
 	
-	acc.x = ((u16)(xha<<8 | xla)) >>4 ;
-	acc.y = ((u16)(yha<<8 | yla)) >>4;
-	acc.z = ((u16)(zha<<8 | zla)) >>4;
+	acc->x = ((s16)(xha<<8 | xla)) >>4 ;
+	acc->y = ((s16)(yha<<8 | yla)) >>4;
+	acc->z = ((s16)(zha<<8 | zla)) >>4;
 }
 
-void readMag(void)
+void readMag(vector *mag)
 {
+	
 	I2C_Start();
 	I2C_SendByte(MAG_ADDRESS_WRITE);
 	I2C_WaitAck();
@@ -155,11 +186,12 @@ void readMag(void)
 	I2C_Stop();
 	
 	//Make Magnetometer 3 channels in vectors mag
-	mag.x = (u16)(xhm << 8 | xlm);
-	mag.y = (u16)(yhm << 8 | ylm);
-	mag.z = (u16)(zhm << 8 | zlm);
-	
+	mag->x = (s16)(xhm << 8 | xlm);
+	mag->y = (s16)(yhm << 8 | ylm);
+	mag->z = (s16)(zhm << 8 | zlm);
 }
+
+
 s16 min(s16 a,s16 b)
 {
 	if(a < b) return a;
@@ -182,47 +214,53 @@ void LSM303Enable(void)
   // 0x00 = 0b00000000
   // Continuous conversion mode
 	writeMagReg(LSM303_MR_REG_M,0X00);
-	m_min.x = -457;
-	m_min.y = -420;
-	m_min.z = -528;
-	m_max.x = 549;
-	m_max.y = 654;
-	m_max.z = 5296;
+}
+void LSM303Read(vector *acc,vector *mag)
+{
+	readAcc(acc);
+	readMag(mag);
+}
+
+int LSM303Heading(vector acc, vector mag)
+{
+	//return Heading((vector){0,-1,0});
+	return Heading((vector){1,0,0},mag,acc);
+}
+
+int Heading(vector from,vector mag,vector acc)
+{
+	vector magt;
 	
-}
-void LSM303Read(void)
-{
-	readAcc();
-	readMag();
-}
+	m_max.x = 516;
+	m_max.y = 592;
+	m_max.z = 441;
+	m_min.x = -445;
+	m_min.y = -378;
+	m_min.z = -445;
+	
+ // shift and scale
+	magt.x = (mag.x - m_min.x) / (m_max.x - m_min.x) * 2 - 1.0;
+	magt.y = (mag.y - m_min.y) / (m_max.y - m_min.y) * 2 - 1.0;
+	magt.z = (mag.z - m_min.z) / (m_max.z - m_min.z) * 2 - 1.0;
 
-int LSM303Heading(void)
-{
-	return Heading((vector){0,-1,0});
-}
+	vector temp_a ;
+	temp_a.x = acc.x;
+	temp_a.y = acc.y;
+	temp_a.z = acc.z;
+	// normalize
+	vector_normalize(&temp_a);
+	//vector_normalize(&m);
 
-int Heading(vector from)
-{
-	 // shift and scale
-    mag.x = (mag.x - m_min.x) / (m_max.x - m_min.x) * 2 - 1.0;
-    mag.y = (mag.y - m_min.y) / (m_max.y - m_min.y) * 2 - 1.0;
-    mag.z = (mag.z - m_min.z) / (m_max.z - m_min.z) * 2 - 1.0;
+	// compute E and N
+	vector E;
+	vector N;
+	vector_cross(&magt, &temp_a, &E);
+	vector_normalize(&E);
+	vector_cross(&temp_a, &E, &N);
 
-    vector temp_a = acc;
-    // normalize
-    vector_normalize(&temp_a);
-    //vector_normalize(&m);
-
-    // compute E and N
-    vector E;
-    vector N;
-    vector_cross(&mag, &temp_a, &E);
-    vector_normalize(&E);
-    vector_cross(&temp_a, &E, &N);
-  
-    // compute heading
-    int heading = round(atan2(vector_dot(&E, &from), vector_dot(&N, &from)) * 180 / PI);
-    if (heading < 0) heading += 360;
+	// compute heading
+	int heading = round(atan2(vector_dot(&E, &from), vector_dot(&N, &from)) * 180 / PI);
+	if (heading < 0) heading += 360;
   return heading;
 }
 
@@ -245,6 +283,8 @@ void vector_normalize(vector *a)
   a->y /= mag;
   a->z /= mag;
 }
+
+
 
 
 

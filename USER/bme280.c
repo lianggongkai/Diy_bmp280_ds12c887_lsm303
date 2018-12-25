@@ -2,41 +2,41 @@
 #include "bme280_defs.h"
 #include "bme280.h"
 
-//移植BMP280的读写函数
-#define BMP280_WR_Byte(addr,bytedata) 	MCU_I2C_Write_Byte(BME280_I2C_ADDR_SEC,addr,bytedata)
-#define BMP280_RD_Byte(addr,pdata)			MCU_I2C_Read_Byte(BME280_I2C_ADDR_SEC,addr,pdata)
-#define BMP280_RD_Bytes(addr,len,buff)	MCU_I2C_Read_Bytes(BME280_I2C_ADDR_SEC,addr,len,buff)
+//移植BME280的读写函数
+#define BME280_WR_Byte(addr,bytedata) 	MCU_I2C_Write_Byte(BME280_I2C_ADDR_SEC,addr,bytedata)
+#define BME280_RD_Byte(addr,pdata)			MCU_I2C_Read_Byte(BME280_I2C_ADDR_SEC,addr,pdata)
+#define BME280_RD_Bytes(addr,len,buff)	MCU_I2C_Read_Bytes(BME280_I2C_ADDR_SEC,addr,len,buff)
 
-//设置BMP280的工作模式
-void BME280_SetOperationMode(void)
+//设置BME280的工作模式
+void SetBME280OperationMode(void)
 {
 	u8 CtrlMeas = 0;
 	//Normal mode,No filter,Oversampling setting 1
 	
 	//Ctrl humidity oversampling 1 times
-	BMP280_WR_Byte(BME280_CTRL_HUM_ADDR,BME280_OVERSAMPLING_4X);
+	BME280_WR_Byte(BME280_CTRL_HUM_ADDR,BME280_OVERSAMPLING_4X);
 	
 	//Pressure and temperature oversamplinng 1times , forced mode
 	CtrlMeas = BME280_NORMAL_MODE<<BME280_SENSOR_MODE_POS;
 	CtrlMeas |= BME280_OVERSAMPLING_4X << BME280_CTRL_PRESS_POS;
 	CtrlMeas |= BME280_OVERSAMPLING_4X << BME280_CTRL_TEMP_POS;
-	BMP280_WR_Byte(BME280_CTRL_MEAS_ADDR, CtrlMeas);
+	BME280_WR_Byte(BME280_CTRL_MEAS_ADDR, CtrlMeas);
 	
 	//No filter , Standby 10ms
 	CtrlMeas = 0;
 	CtrlMeas |= BME280_FILTER_COEFF_16 << BME280_FILTER_POS;
 	CtrlMeas |= BME280_STANDBY_TIME_62_5_MS << BME280_STANDBY_POS;
-	BMP280_WR_Byte(BME280_CONFIG_ADDR,CtrlMeas);
+	BME280_WR_Byte(BME280_CONFIG_ADDR,CtrlMeas);
 }
 
-//读取BMP280的校准参数
-void ReadCalibrate(struct bme280_calib_data *calibrate)
+//读取BME280的校准参数
+void ReadBME280Calibrate(struct bme280_calib_data *calibrate)
 {
 	u8 CalbrtPTBuff[BME280_TEMP_PRESS_CALIB_DATA_LEN] = {0};
 	u8 CalbrtHBuff[BME280_HUMIDITY_CALIB_DATA_LEN] = {0};
 	
-	BMP280_RD_Bytes(BME280_TEMP_PRESS_CALIB_DATA_ADDR,BME280_TEMP_PRESS_CALIB_DATA_LEN,CalbrtPTBuff);
-	BMP280_RD_Bytes(BME280_HUMIDITY_CALIB_DATA_ADDR,BME280_HUMIDITY_CALIB_DATA_LEN,CalbrtHBuff);
+	BME280_RD_Bytes(BME280_TEMP_PRESS_CALIB_DATA_ADDR,BME280_TEMP_PRESS_CALIB_DATA_LEN,CalbrtPTBuff);
+	BME280_RD_Bytes(BME280_HUMIDITY_CALIB_DATA_ADDR,BME280_HUMIDITY_CALIB_DATA_LEN,CalbrtHBuff);
 	
 	calibrate->dig_T1 = (u16)(CalbrtPTBuff[0] + (CalbrtPTBuff[1] << 8));
 	calibrate->dig_T2 = (s16)(CalbrtPTBuff[2] + (CalbrtPTBuff[3] << 8));
@@ -61,13 +61,13 @@ void ReadCalibrate(struct bme280_calib_data *calibrate)
 }
 
 //读取温湿度压力的原始数据
-void ReadMeasureResult(struct bme280_uncomp_data *pdata)
+void ReadBME280MeasureResult(struct bme280_uncomp_data *pdata)
 {
 	//BME280_DATA_ADDR
 	//BME280_P_T_H_DATA_LEN
 	u8 pth_buff[BME280_P_T_H_DATA_LEN] = {0};
 	
-	BMP280_RD_Bytes(BME280_DATA_ADDR,BME280_P_T_H_DATA_LEN,pth_buff);
+	BME280_RD_Bytes(BME280_DATA_ADDR,BME280_P_T_H_DATA_LEN,pth_buff);
 	
 	pdata->pressure = (uint32_t)((pth_buff[0]<<12) + (pth_buff[1]<<4) + (pth_buff[2]>>4));
 	pdata->temperature= (uint32_t)((pth_buff[3]<<12) + (pth_buff[4]<<4) + (pth_buff[5]>>4));
